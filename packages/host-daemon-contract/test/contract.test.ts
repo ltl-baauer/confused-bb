@@ -484,6 +484,7 @@ const ONLINE_RPC_RESPONSE_RESULT_FIXTURES: OnlineRpcResponseResultFixtures = {
 };
 
 const SETTLED_RESPONSE_RESULT_FIXTURES: SettledResponseResultFixtures = {
+  "thread.rewind.discard": {},
   "thread.rewind.prepare": {
     providerThreadId: "provider-thread-rewind",
   },
@@ -1054,10 +1055,10 @@ describe("host-daemon local schemas", () => {
 });
 
 describe("host-daemon command schemas", () => {
-  // Version 99 moves Claude workflow/subagent enforcement from the session
-  // payload into live adapter controls, so an older daemon must update.
-  it("uses protocol version 99 for live Claude feature settings", () => {
-    expect(HOST_DAEMON_PROTOCOL_VERSION).toBe(99);
+  // Version 100 builds on live Claude feature settings in version 99 with
+  // provider-native history checkpointing and staged rewind cleanup.
+  it("uses protocol version 100 for staged thread rewind cleanup", () => {
+    expect(HOST_DAEMON_PROTOCOL_VERSION).toBe(100);
   });
 
   it("binds Plan cancellation to a required turn id and typed result", () => {
