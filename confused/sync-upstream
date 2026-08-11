@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "The worktree must be clean before an upstream sync." >&2
+  exit 1
+fi
+
+if ! git remote get-url upstream >/dev/null 2>&1; then
+  git remote add upstream https://github.com/get-bb/bb.git
+fi
+
+sync_branch="confused/upstream-sync"
+git fetch upstream main
+git switch main
+git branch -D "$sync_branch" 2>/dev/null || true
+git switch -c "$sync_branch"
+git merge --no-edit upstream/main
+
+pnpm install --frozen-lockfile
+pnpm exec turbo run typecheck \
+  --filter=@bb/app \
+  --filter=@bb/desktop \
+  --filter=@bb/desktop-contract \
+  --output-logs=new-only
+npm --prefix extensions/notes ci
+npm --prefix extensions/notes run typecheck
+
+git switch main
+git merge --ff-only "$sync_branch"
+git branch -d "$sync_branch"
+
+if [[ "${1:-}" == "--push" ]]; then
+  git push origin main
+fi
