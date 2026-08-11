@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "bb plugin build",
+    "test": "pnpm --dir ../.. exec vitest run --config extensions/notes/vitest.config.ts",
     "types": "bb plugin types",
     "typecheck": "bb plugin types && tsc --noEmit"
   },
