@@ -51,6 +51,8 @@ export type BbDesktopAppCommandHandler = (command: AppCommandId) => void;
 export type BbDesktopCloseWindowRequestHandler = () => boolean;
 
 export interface BbDesktopApi extends BbDesktopInfo {
+  /** True when the desktop shell supports custom glass controls. */
+  glassAppearance?: boolean;
   /**
    * Control surface for the desktop-only web browser tab. The renderer drives
    * a hardened, isolated Electron `WebContentsView` through these methods; the

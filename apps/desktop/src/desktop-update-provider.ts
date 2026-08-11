@@ -1,23 +1,29 @@
-export type DesktopReleaseChannel = "latest" | "nightly";
+export type DesktopReleaseChannel = "latest" | "nightly" | "glass";
 
 export interface DesktopReleaseInfo {
-  applicationName: "bb" | "bb Nightly";
+  applicationName: "bb" | "bb Nightly" | "bb Glass";
   channel: DesktopReleaseChannel;
   iconFileName: "icon.png" | "icon-nightly.png";
-  releaseTag: "desktop-latest" | "desktop-nightly";
+  releaseTag: "desktop-latest" | "desktop-nightly" | "desktop-glass";
   updateReleaseBaseUrl: string;
 }
 
 export function createDesktopReleaseInfo(
   channel: DesktopReleaseChannel,
 ): DesktopReleaseInfo {
-  const nightly = channel === "nightly";
-  const releaseTag = nightly ? "desktop-nightly" : "desktop-latest";
+  const applicationName =
+    channel === "nightly" ? "bb Nightly" : channel === "glass" ? "bb Glass" : "bb";
+  const releaseTag =
+    channel === "nightly"
+      ? "desktop-nightly"
+      : channel === "glass"
+        ? "desktop-glass"
+        : "desktop-latest";
 
   return {
-    applicationName: nightly ? "bb Nightly" : "bb",
+    applicationName,
     channel,
-    iconFileName: nightly ? "icon-nightly.png" : "icon.png",
+    iconFileName: channel === "nightly" ? "icon-nightly.png" : "icon.png",
     releaseTag,
     updateReleaseBaseUrl: `https://github.com/get-bb/bb/releases/download/${releaseTag}/`,
   };
@@ -29,12 +35,16 @@ function resolveBuiltDesktopReleaseChannel(
   if (rawChannel === undefined || rawChannel.length === 0) {
     return "latest";
   }
-  if (rawChannel === "latest" || rawChannel === "nightly") {
+  if (
+    rawChannel === "latest" ||
+    rawChannel === "nightly" ||
+    rawChannel === "glass"
+  ) {
     return rawChannel;
   }
 
   throw new Error(
-    `Built desktop release channel must be latest or nightly, got ${String(rawChannel)}.`,
+    `Built desktop release channel must be latest, nightly, or glass, got ${String(rawChannel)}.`,
   );
 }
 

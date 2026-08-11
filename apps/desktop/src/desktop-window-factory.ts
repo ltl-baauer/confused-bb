@@ -16,6 +16,7 @@ import {
   type StatefulBrowserWindow,
 } from "./window-state.js";
 import type { DesktopContextMenuWebContents } from "./desktop-context-menu.js";
+import { createGlassWindowOptions } from "./glass-window-options.js";
 
 export type DesktopWindowIcon = BrowserWindowConstructorOptions["icon"];
 
@@ -166,6 +167,7 @@ function createWindowOptions(
   args: CreateWindowOptionsArgs,
 ): BrowserWindowConstructorOptions {
   return {
+    ...createGlassWindowOptions(),
     frame: false,
     height: args.bounds.height,
     icon: args.icon,

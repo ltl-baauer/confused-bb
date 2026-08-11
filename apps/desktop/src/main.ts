@@ -2123,16 +2123,20 @@ async function runDesktopApp(): Promise<void> {
 
   desktopUpdateService = createDesktopUpdateService({
     currentVersion: desktopVersion,
-    enabled: app.isPackaged || process.env.BB_DESKTOP_VERSION_CHECK === "1",
+    enabled:
+      DESKTOP_RELEASE_INFO.channel !== "glass" &&
+      (app.isPackaged || process.env.BB_DESKTOP_VERSION_CHECK === "1"),
     feedUrl: desktopUpdateFeedUrl,
     logger: createDesktopLogger(),
   });
   desktopAutoUpdateService = createDesktopAutoUpdateService({
     currentVersion: desktopVersion,
-    enabled: shouldEnableDesktopAutoUpdate({
-      env: process.env,
-      isPackaged: app.isPackaged,
-    }),
+    enabled:
+      DESKTOP_RELEASE_INFO.channel !== "glass" &&
+      shouldEnableDesktopAutoUpdate({
+        env: process.env,
+        isPackaged: app.isPackaged,
+      }),
     forceDevUpdateConfig:
       !app.isPackaged && process.env.BB_DESKTOP_AUTO_UPDATE === "1",
     logger: createDesktopLogger(),

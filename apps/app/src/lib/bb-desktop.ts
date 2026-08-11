@@ -115,3 +115,7 @@ export function getDesktopBrowserApi(): BbDesktopBrowserApi | null {
 export function isDesktopBrowserAvailable(): boolean {
   return getDesktopBrowserApi() !== null;
 }
+
+export function isGlassAppearanceAvailable(): boolean {
+  return getBbDesktopInfo()?.glassAppearance === true;
+}

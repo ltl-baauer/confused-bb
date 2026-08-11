@@ -59,6 +59,7 @@ import {
 import { useSystemConfig } from "@/hooks/queries/system-queries";
 import { useWorkspaceOpenTargets } from "@/hooks/useWorkspaceOpenTargets";
 import { isDesktopBrowserAvailable } from "@/lib/bb-desktop";
+import { GlassAppearanceControls } from "@/components/settings/GlassAppearanceControls";
 import {
   FAVICON_COLOR_VALUES,
   getFaviconGlyphHref,
@@ -764,6 +765,7 @@ export function AppearanceSettingsSection({
           faviconColor={faviconColor}
           onFaviconColorChange={onFaviconColorChange}
         />
+        <GlassAppearanceControls />
       </div>
     </SettingsSection>
   );

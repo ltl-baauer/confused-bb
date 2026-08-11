@@ -61,6 +61,47 @@ import {
   type BbDesktopSpellcheckApi,
 } from "./desktop-spellcheck-contract.js";
 
+const GLASS_RENDERER_CSS = `
+body.bb-app-shell {
+  background-color: transparent !important;
+}
+
+body.bb-app-shell [data-sidebar="inset"] {
+  background-color: color-mix(in srgb, var(--background) var(--bb-glass-main-opacity, 22%), transparent) !important;
+  -webkit-backdrop-filter: var(--bb-glass-main-filter, none);
+  backdrop-filter: var(--bb-glass-main-filter, none);
+}
+
+body.bb-app-shell [data-sidebar="panel"] {
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-sidebar-opacity, 30%), transparent) !important;
+  -webkit-backdrop-filter: var(--bb-glass-sidebar-filter, none);
+  backdrop-filter: var(--bb-glass-sidebar-filter, none);
+}
+
+body.bb-app-shell [data-sidebar="panel"] > [data-sidebar="sidebar"] {
+  background-color: transparent !important;
+}
+
+body.bb-app-shell header.bg-surface-scrim {
+  background-color: color-mix(in srgb, var(--surface-scrim) 25%, transparent) !important;
+}
+
+body.bb-app-shell aside.bg-sidebar {
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-panel-opacity, 30%), transparent) !important;
+  -webkit-backdrop-filter: var(--bb-glass-panel-filter, none);
+  backdrop-filter: var(--bb-glass-panel-filter, none);
+}
+
+body.bb-app-shell aside.bg-sidebar > .bg-sidebar,
+body.bb-app-shell aside.bg-sidebar > .bg-sidebar > .bg-sidebar {
+  background-color: transparent !important;
+}
+`;
+
+if (process.env.BB_DESKTOP_RELEASE_CHANNEL === "glass") {
+  void webFrame.insertCSS(GLASS_RENDERER_CSS);
+}
+
 function getDesktopVersion(version: string | undefined): string {
   if (version === undefined || version.length === 0) {
     throw new Error("Desktop version must be injected at build time");
@@ -271,6 +312,7 @@ const bbBrowserApi: BbDesktopBrowserApi = {
 
 const bbDesktopApi: BbDesktopApi = {
   browser: bbBrowserApi,
+  glassAppearance: process.env.BB_DESKTOP_RELEASE_CHANNEL === "glass",
   get lastCheckedAt() {
     return currentInfo.lastCheckedAt;
   },

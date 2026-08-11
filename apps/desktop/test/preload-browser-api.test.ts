@@ -69,6 +69,7 @@ const electronMock = vi.hoisted(() => {
   const listeners = new Map<string, IpcRendererListener>();
   const sendCalls: SendCall[] = [];
   const exposedNames: string[] = [];
+  const insertedCss: string[] = [];
   let exposedApi: BbDesktopApi | null = null;
   let exposedName: string | null = null;
   let exposedSpellcheckApi: {
@@ -84,6 +85,7 @@ const electronMock = vi.hoisted(() => {
       return exposedName;
     },
     exposedNames,
+    insertedCss,
     get exposedSpellcheckApi() {
       return exposedSpellcheckApi;
     },
@@ -95,6 +97,7 @@ const electronMock = vi.hoisted(() => {
       exposedName = null;
       exposedSpellcheckApi = null;
       exposedNames.length = 0;
+      insertedCss.length = 0;
       invokeCalls.length = 0;
       listeners.clear();
       sendCalls.length = 0;
@@ -134,6 +137,10 @@ const electronMock = vi.hoisted(() => {
       },
     },
     webFrame: {
+      insertCSS(css: string): Promise<string> {
+        insertedCss.push(css);
+        return Promise.resolve("glass-css-key");
+      },
       getZoomFactor(): number {
         return zoomFactor;
       },
@@ -158,10 +165,13 @@ interface EmitIpcPayloadArgs {
   payload: unknown;
 }
 
-async function loadPreload(): Promise<BbDesktopApi> {
+async function loadPreload(
+  releaseChannel: "latest" | "glass" = "latest",
+): Promise<BbDesktopApi> {
   electronMock.reset();
   vi.resetModules();
   process.env.BB_DESKTOP_VERSION = "0.0.0-test";
+  process.env.BB_DESKTOP_RELEASE_CHANNEL = releaseChannel;
   await import("../src/preload.js");
   const api = electronMock.exposedApi;
   expect(electronMock.exposedName).toBe("bbDesktop");
@@ -182,6 +192,25 @@ function emitIpcPayload(args: EmitIpcPayloadArgs): void {
 }
 
 describe("desktop preload browser API", () => {
+  it("removes stacked renderer backgrounds from glass builds", async () => {
+    await loadPreload("glass");
+
+    expect(electronMock.insertedCss).toHaveLength(1);
+    expect(electronMock.insertedCss[0]).toContain(
+      "body.bb-app-shell [data-sidebar=\"inset\"]",
+    );
+    expect(electronMock.insertedCss[0]).toContain(
+      "[data-sidebar=\"panel\"] > [data-sidebar=\"sidebar\"]",
+    );
+    expect(electronMock.insertedCss[0]).toContain(
+      "background-color: transparent !important",
+    );
+    expect(electronMock.insertedCss[0]).toContain(
+      "var(--bb-glass-main-filter, none)",
+    );
+    expect(electronMock.exposedApi?.glassAppearance).toBe(true);
+  });
+
   it("exposes a narrow spellcheck helper for desktop context menus", async () => {
     await loadPreload();
 

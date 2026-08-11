@@ -13,6 +13,7 @@ import {
 } from "./lib/query-client";
 import { takeOverPanelResizeCursor } from "./lib/resizeCursor";
 import { applyCachedAppThemeCss } from "./lib/themes";
+import { initializeGlassAppearance } from "./lib/glass-appearance";
 import "./app.css";
 
 const queryClient = createAppQueryClient();
@@ -26,6 +27,7 @@ initializePreferredTheme();
 // non-default theme doesn't flash the default. useAppTheme reconciles it with
 // the server's authoritative appearance once /system/config loads.
 applyCachedAppThemeCss();
+initializeGlassAppearance();
 initializeFavicon();
 takeOverPanelResizeCursor();
 

@@ -63,7 +63,7 @@ const electronBuilderConfigSchema = z
     publish: z.tuple([
       z
         .object({
-          channel: z.enum(["latest", "nightly"]),
+          channel: z.enum(["latest", "nightly", "glass"]),
           provider: z.literal("generic"),
           url: z.string().min(1),
         })
@@ -460,6 +460,23 @@ describe("electron-builder signing config", () => {
     });
   });
 
+  it("creates a separate glass app identity and update feed", async () => {
+    const { config } = await readResolvedConfig({
+      BB_DESKTOP_RELEASE_CHANNEL: "glass",
+    });
+    const glassRelease = createDesktopReleaseInfo("glass");
+
+    expect(config.appId).toBe("dev.bb.desktop.glass");
+    expect(config.productName).toBe("bb Glass");
+    expect(config.artifactName).toBe("bb-glass-${version}-${arch}.${ext}");
+    expect(config.mac.icon).toBe("assets/icon.icns");
+    expect(config.publish[0]).toEqual({
+      channel: "glass",
+      provider: "generic",
+      url: glassRelease.updateReleaseBaseUrl,
+    });
+  });
+
   it("rejects unknown desktop release channels", async () => {
     const result = await runConfigScript({
       BB_DESKTOP_RELEASE_CHANNEL: "canary",
@@ -467,7 +484,7 @@ describe("electron-builder signing config", () => {
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain(
-      "BB_DESKTOP_RELEASE_CHANNEL must be latest or nightly",
+      "BB_DESKTOP_RELEASE_CHANNEL must be latest, nightly, or glass",
     );
   });
 
