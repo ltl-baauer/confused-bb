@@ -39,6 +39,7 @@ import {
   BB_DESKTOP_WINDOW_STATE_CHANGED_CHANNEL,
 } from "../src/desktop-window-command-ipc.js";
 import { BB_DESKTOP_SPELLCHECK_GLOBAL_NAME } from "../src/desktop-spellcheck-contract.js";
+import { BB_DESKTOP_SET_GLASS_REGIONS_CHANNEL } from "../src/glass-contract.js";
 
 const electronMock = vi.hoisted(() => {
   interface IpcRendererEvent {}
@@ -193,7 +194,7 @@ function emitIpcPayload(args: EmitIpcPayloadArgs): void {
 
 describe("desktop preload browser API", () => {
   it("removes stacked renderer backgrounds from glass builds", async () => {
-    await loadPreload("glass");
+    const api = await loadPreload("glass");
 
     expect(electronMock.insertedCss).toHaveLength(1);
     expect(electronMock.insertedCss[0]).toContain(
@@ -205,10 +206,16 @@ describe("desktop preload browser API", () => {
     expect(electronMock.insertedCss[0]).toContain(
       "background-color: transparent !important",
     );
-    expect(electronMock.insertedCss[0]).toContain(
-      "var(--bb-glass-main-filter, none)",
-    );
+    expect(electronMock.insertedCss[0]).not.toContain("backdrop-filter");
     expect(electronMock.exposedApi?.glassAppearance).toBe(true);
+    const regions = [
+      { id: "main" as const, x: 0, y: 0, width: 800, height: 600, blur: 60 },
+    ];
+    api.setGlassRegions?.(regions);
+    expect(electronMock.sendCalls).toContainEqual({
+      channel: BB_DESKTOP_SET_GLASS_REGIONS_CHANNEL,
+      payload: regions,
+    });
   });
 
   it("exposes a narrow spellcheck helper for desktop context menus", async () => {

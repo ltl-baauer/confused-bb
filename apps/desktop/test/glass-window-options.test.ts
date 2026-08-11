@@ -6,11 +6,9 @@ describe("glass window options", () => {
     expect(createGlassWindowOptions("latest")).toEqual({});
   });
 
-  it("uses native macOS vibrancy for glass builds", () => {
+  it("uses a clear window for native glass regions", () => {
     expect(createGlassWindowOptions("glass")).toEqual({
       backgroundColor: "#00000000",
-      vibrancy: "under-window",
-      visualEffectState: "followWindow",
     });
   });
 });

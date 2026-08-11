@@ -27,6 +27,10 @@ const desktopVersion = readPackageVersion(
 );
 const desktopReleaseChannel = resolveDesktopReleaseChannel(process.env);
 
+if (desktopReleaseChannel === "glass") {
+  await import("./build-glass-native.mjs");
+}
+
 const commonOptions = {
   bundle: true,
   define: {
