@@ -205,8 +205,9 @@ describe("desktop preload browser API", () => {
     expect(electronMock.insertedCss[0]).toContain(
       "background-color: transparent !important",
     );
-    expect(electronMock.insertedCss[0]).toContain(
-      "var(--bb-glass-main-filter, none)",
+    expect(electronMock.insertedCss[0]).not.toContain("blur(");
+    expect(electronMock.insertedCss[0]).not.toContain(
+      "--bb-glass-main-filter",
     );
     expect(electronMock.exposedApi?.glassAppearance).toBe(true);
   });

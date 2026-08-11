@@ -153,6 +153,7 @@ async function prepareNodePtyPackageDirectory(packageDirectory) {
 
 function resolveBetterSqlite3PrebuildArguments({ electronVersion, arch }) {
   return [
+    "--force",
     "--runtime=electron",
     `--target=${electronVersion}`,
     `--arch=${arch}`,

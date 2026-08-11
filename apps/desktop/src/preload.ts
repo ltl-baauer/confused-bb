@@ -62,20 +62,30 @@ import {
 } from "./desktop-spellcheck-contract.js";
 
 const GLASS_RENDERER_CSS = `
+html.bb-app-shell-root,
 body.bb-app-shell {
   background-color: transparent !important;
 }
 
+body.bb-app-shell::after {
+  position: fixed;
+  z-index: 2147483647;
+  inset: 0;
+  border: 1px solid color-mix(in oklab, var(--foreground) 34%, transparent);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 12%, transparent);
+  pointer-events: none;
+  content: "";
+}
+
 body.bb-app-shell [data-sidebar="inset"] {
-  background-color: color-mix(in srgb, var(--background) var(--bb-glass-main-opacity, 22%), transparent) !important;
-  -webkit-backdrop-filter: var(--bb-glass-main-filter, none);
-  backdrop-filter: var(--bb-glass-main-filter, none);
+  background-color: color-mix(in srgb, var(--background) var(--bb-glass-main-opacity, 2%), transparent) !important;
 }
 
 body.bb-app-shell [data-sidebar="panel"] {
-  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-sidebar-opacity, 30%), transparent) !important;
-  -webkit-backdrop-filter: var(--bb-glass-sidebar-filter, none);
-  backdrop-filter: var(--bb-glass-sidebar-filter, none);
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-sidebar-opacity, 4%), transparent) !important;
 }
 
 body.bb-app-shell [data-sidebar="panel"] > [data-sidebar="sidebar"] {
@@ -83,13 +93,13 @@ body.bb-app-shell [data-sidebar="panel"] > [data-sidebar="sidebar"] {
 }
 
 body.bb-app-shell header.bg-surface-scrim {
-  background-color: color-mix(in srgb, var(--surface-scrim) 25%, transparent) !important;
+  background-color: color-mix(in srgb, var(--surface-scrim) 6%, transparent) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 body.bb-app-shell aside.bg-sidebar {
-  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-panel-opacity, 30%), transparent) !important;
-  -webkit-backdrop-filter: var(--bb-glass-panel-filter, none);
-  backdrop-filter: var(--bb-glass-panel-filter, none);
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-panel-opacity, 4%), transparent) !important;
 }
 
 body.bb-app-shell aside.bg-sidebar > .bg-sidebar,

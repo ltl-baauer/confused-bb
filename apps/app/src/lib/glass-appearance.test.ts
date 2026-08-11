@@ -20,42 +20,26 @@ describe("glass appearance", () => {
     expect(readGlassAppearanceSettings()).toEqual(DEFAULT_GLASS_APPEARANCE);
   });
 
-  it("clamps opacity and blur values", () => {
+  it("clamps opacity values", () => {
     expect(
       parseGlassAppearanceSettings({
         mainOpacity: 130,
-        mainBlur: 80,
         sidebarOpacity: -2,
-        sidebarBlur: -8,
         panelOpacity: 40,
-        panelBlur: 12,
       }),
     ).toEqual({
       mainOpacity: 100,
-      mainBlur: 30,
       sidebarOpacity: 0,
-      sidebarBlur: 0,
       panelOpacity: 40,
-      panelBlur: 12,
     });
   });
 
-  it("removes the CSS filter layer when blur is zero", () => {
+  it("sets the almost-clear default tint", () => {
     applyGlassAppearanceSettings(DEFAULT_GLASS_APPEARANCE);
     expect(
       document.documentElement.style.getPropertyValue(
-        "--bb-glass-main-filter",
+        "--bb-glass-main-opacity",
       ),
-    ).toBe("none");
-
-    applyGlassAppearanceSettings({
-      ...DEFAULT_GLASS_APPEARANCE,
-      mainBlur: 14,
-    });
-    expect(
-      document.documentElement.style.getPropertyValue(
-        "--bb-glass-main-filter",
-      ),
-    ).toBe("blur(14px)");
+    ).toBe("2%");
   });
 });

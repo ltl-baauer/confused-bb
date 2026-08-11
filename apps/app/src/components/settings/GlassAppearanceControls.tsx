@@ -29,10 +29,9 @@ export function GlassAppearanceControls() {
 
   const updateValue = (
     region: GlassRegion,
-    kind: "Opacity" | "Blur",
     value: number,
   ): void => {
-    const key = `${region}${kind}` as keyof GlassAppearanceSettings;
+    const key = `${region}Opacity` as keyof GlassAppearanceSettings;
     setSettings({ ...settings, [key]: value });
   };
 
@@ -42,7 +41,7 @@ export function GlassAppearanceControls() {
         <div>
           <p className="text-sm text-foreground">Glass</p>
           <p className="mt-0.5 text-xs text-subtle-foreground/75">
-            Set the transparency and blur for each region.
+            Set each region&apos;s transparency. macOS supplies the native blur.
           </p>
         </div>
         <Button
@@ -56,9 +55,7 @@ export function GlassAppearanceControls() {
       </div>
       {GLASS_REGIONS.map(({ label, region }) => {
         const opacityKey = `${region}Opacity` as keyof GlassAppearanceSettings;
-        const blurKey = `${region}Blur` as keyof GlassAppearanceSettings;
         const opacity = settings[opacityKey];
-        const blur = settings[blurKey];
         const transparency = 100 - opacity;
 
         return (
@@ -76,24 +73,10 @@ export function GlassAppearanceControls() {
                 step={1}
                 value={[transparency]}
                 onValueChange={([value = transparency]) =>
-                  updateValue(region, "Opacity", 100 - value)
+                  updateValue(region, 100 - value)
                 }
               />
               <span className="text-right tabular-nums">{transparency}%</span>
-            </label>
-            <label className="grid grid-cols-[92px_1fr_44px] items-center gap-3 text-xs text-muted-foreground">
-              <span>Blur</span>
-              <Slider
-                aria-label={`${label} blur`}
-                min={0}
-                max={30}
-                step={1}
-                value={[blur]}
-                onValueChange={([value = blur]) =>
-                  updateValue(region, "Blur", value)
-                }
-              />
-              <span className="text-right tabular-nums">{blur}px</span>
             </label>
           </div>
         );
