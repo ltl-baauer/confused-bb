@@ -1056,8 +1056,8 @@ describe("host-daemon local schemas", () => {
 
 describe("host-daemon command schemas", () => {
   // Version 100 builds on live Claude feature settings in version 99 with
-  // provider-native history checkpointing and staged rewind cleanup.
-  it("uses protocol version 100 for staged thread rewind cleanup", () => {
+  // provider-native history checkpointing and ownership-leased staged rewinds.
+  it("uses protocol version 100 for leased staged thread rewind cleanup", () => {
     expect(HOST_DAEMON_PROTOCOL_VERSION).toBe(100);
   });
 
