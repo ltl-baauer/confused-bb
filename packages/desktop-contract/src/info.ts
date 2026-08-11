@@ -50,21 +50,9 @@ export type BbDesktopOpenNewTabHandler = () => void;
 export type BbDesktopAppCommandHandler = (command: AppCommandId) => void;
 export type BbDesktopCloseWindowRequestHandler = () => boolean;
 
-export interface BbDesktopGlassRegion {
-  id: "main" | "panel" | "sidebar";
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  /** Native effect strength from 0 through 100. */
-  blur: number;
-}
-
 export interface BbDesktopApi extends BbDesktopInfo {
   /** True when the desktop shell supports custom glass controls. */
   glassAppearance?: boolean;
-  /** Update the native macOS glass regions for this window. */
-  setGlassRegions?(regions: BbDesktopGlassRegion[]): void;
   /**
    * Control surface for the desktop-only web browser tab. The renderer drives
    * a hardened, isolated Electron `WebContentsView` through these methods; the

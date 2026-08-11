@@ -24,7 +24,7 @@ describe("glass appearance", () => {
     expect(
       parseGlassAppearanceSettings({
         mainOpacity: 130,
-        mainBlur: 180,
+        mainBlur: 80,
         sidebarOpacity: -2,
         sidebarBlur: -8,
         panelOpacity: 40,
@@ -32,7 +32,7 @@ describe("glass appearance", () => {
       }),
     ).toEqual({
       mainOpacity: 100,
-      mainBlur: 100,
+      mainBlur: 30,
       sidebarOpacity: 0,
       sidebarBlur: 0,
       panelOpacity: 40,
@@ -40,15 +40,22 @@ describe("glass appearance", () => {
     });
   });
 
-  it("keeps the renderer free of a backdrop filter", () => {
+  it("removes the CSS filter layer when blur is zero", () => {
     applyGlassAppearanceSettings(DEFAULT_GLASS_APPEARANCE);
     expect(
       document.documentElement.style.getPropertyValue(
-        "--bb-glass-main-opacity",
+        "--bb-glass-main-filter",
       ),
-    ).toBe("2%");
+    ).toBe("none");
+
+    applyGlassAppearanceSettings({
+      ...DEFAULT_GLASS_APPEARANCE,
+      mainBlur: 14,
+    });
     expect(
-      document.documentElement.style.getPropertyValue("--bb-glass-main-filter"),
-    ).toBe("");
+      document.documentElement.style.getPropertyValue(
+        "--bb-glass-main-filter",
+      ),
+    ).toBe("blur(14px)");
   });
 });

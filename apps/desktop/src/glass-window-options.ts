@@ -9,5 +9,7 @@ export function createGlassWindowOptions(
 
   return {
     backgroundColor: "#00000000",
+    vibrancy: "under-window",
+    visualEffectState: "followWindow",
   };
 }

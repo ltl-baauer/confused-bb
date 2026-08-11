@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { BbDesktopGlassRegion } from "@bb/desktop-contract";
 import { isGlassAppearanceAvailable } from "./bb-desktop";
 
 export interface GlassAppearanceSettings {
@@ -12,17 +11,21 @@ export interface GlassAppearanceSettings {
 }
 
 export const DEFAULT_GLASS_APPEARANCE: GlassAppearanceSettings = {
-  mainOpacity: 2,
-  mainBlur: 8,
-  sidebarOpacity: 4,
-  sidebarBlur: 10,
-  panelOpacity: 4,
-  panelBlur: 10,
+  mainOpacity: 22,
+  mainBlur: 0,
+  sidebarOpacity: 30,
+  sidebarBlur: 0,
+  panelOpacity: 30,
+  panelBlur: 0,
 };
 
-export const GLASS_APPEARANCE_STORAGE_KEY = "bb.glass-appearance.v2";
+export const GLASS_APPEARANCE_STORAGE_KEY = "bb.glass-appearance.v1";
 
-const OPACITY_KEYS = ["mainOpacity", "sidebarOpacity", "panelOpacity"] as const;
+const OPACITY_KEYS = [
+  "mainOpacity",
+  "sidebarOpacity",
+  "panelOpacity",
+] as const;
 const BLUR_KEYS = ["mainBlur", "sidebarBlur", "panelBlur"] as const;
 
 function clamp(value: unknown, minimum: number, maximum: number): number {
@@ -45,7 +48,7 @@ export function parseGlassAppearanceSettings(
     settings[key] = clamp(record[key], 0, 100);
   }
   for (const key of BLUR_KEYS) {
-    settings[key] = clamp(record[key], 0, 100);
+    settings[key] = clamp(record[key], 0, 30);
   }
   return settings;
 }
@@ -62,114 +65,31 @@ export function readGlassAppearanceSettings(): GlassAppearanceSettings {
   }
 }
 
-let currentSettings = { ...DEFAULT_GLASS_APPEARANCE };
-let layoutFrame: number | null = null;
-
-const GLASS_REGION_SELECTORS = {
-  main: '[data-sidebar="inset"]',
-  panel: "aside.bg-sidebar",
-  sidebar: '[data-sidebar="panel"]',
-} as const;
-
-function readRegion(
-  id: BbDesktopGlassRegion["id"],
-  selector: string,
-  blur: number,
-): BbDesktopGlassRegion | null {
-  const element = document.querySelector<HTMLElement>(selector);
-  if (element === null) {
-    return null;
-  }
-  const bounds = element.getBoundingClientRect();
-  return {
-    id,
-    x: Math.round(bounds.x),
-    y: Math.round(bounds.y),
-    width: Math.round(bounds.width),
-    height: Math.round(bounds.height),
-    blur,
-  };
-}
-
-function sendNativeGlassLayout(): void {
-  layoutFrame = null;
-  const api = window.bbDesktop;
-  if (api?.setGlassRegions === undefined) {
-    return;
-  }
-  const regions = [
-    readRegion(
-      "sidebar",
-      GLASS_REGION_SELECTORS.sidebar,
-      currentSettings.sidebarBlur,
-    ),
-    readRegion("main", GLASS_REGION_SELECTORS.main, currentSettings.mainBlur),
-    readRegion(
-      "panel",
-      GLASS_REGION_SELECTORS.panel,
-      currentSettings.panelBlur,
-    ),
-  ].filter((region): region is BbDesktopGlassRegion => region !== null);
-  api.setGlassRegions(regions);
-}
-
-function scheduleNativeGlassLayout(): void {
-  if (window.bbDesktop?.setGlassRegions === undefined) {
-    return;
-  }
-  if (layoutFrame === null) {
-    layoutFrame = window.requestAnimationFrame(sendNativeGlassLayout);
-  }
-}
-
-function observeNativeGlassLayout(): void {
-  const resizeObserver = new ResizeObserver(scheduleNativeGlassLayout);
-  let observedElements = new Set<Element>();
-
-  const refreshObservedElements = (): void => {
-    const nextElements = new Set(
-      Object.values(GLASS_REGION_SELECTORS)
-        .map((selector) => document.querySelector(selector))
-        .filter((element): element is Element => element !== null),
-    );
-    const elementsChanged =
-      nextElements.size !== observedElements.size ||
-      [...nextElements].some((element) => !observedElements.has(element));
-    if (!elementsChanged) {
-      return;
-    }
-    resizeObserver.disconnect();
-    for (const element of nextElements) {
-      resizeObserver.observe(element);
-    }
-    observedElements = nextElements;
-  };
-
-  const mutationObserver = new MutationObserver(() => {
-    refreshObservedElements();
-    scheduleNativeGlassLayout();
-  });
-  mutationObserver.observe(document.body, { childList: true, subtree: true });
-  window.addEventListener("resize", scheduleNativeGlassLayout);
-  refreshObservedElements();
-  scheduleNativeGlassLayout();
+function blurFilter(value: number): string {
+  return value === 0 ? "none" : `blur(${value}px)`;
 }
 
 export function applyGlassAppearanceSettings(
   settings: GlassAppearanceSettings,
 ): void {
-  currentSettings = settings;
   const root = document.documentElement.style;
   root.setProperty("--bb-glass-main-opacity", `${settings.mainOpacity}%`);
-  root.setProperty("--bb-glass-sidebar-opacity", `${settings.sidebarOpacity}%`);
+  root.setProperty("--bb-glass-main-filter", blurFilter(settings.mainBlur));
+  root.setProperty(
+    "--bb-glass-sidebar-opacity",
+    `${settings.sidebarOpacity}%`,
+  );
+  root.setProperty(
+    "--bb-glass-sidebar-filter",
+    blurFilter(settings.sidebarBlur),
+  );
   root.setProperty("--bb-glass-panel-opacity", `${settings.panelOpacity}%`);
-  scheduleNativeGlassLayout();
+  root.setProperty("--bb-glass-panel-filter", blurFilter(settings.panelBlur));
 }
 
 export function initializeGlassAppearance(): void {
   if (isGlassAppearanceAvailable()) {
     applyGlassAppearanceSettings(readGlassAppearanceSettings());
-    observeNativeGlassLayout();
   }
 }
 

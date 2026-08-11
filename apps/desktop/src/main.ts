@@ -107,7 +107,6 @@ import {
   type DesktopWindowFactory,
 } from "./desktop-window-factory.js";
 import { registerDesktopContextMenu } from "./desktop-context-menu.js";
-import { registerNativeGlassIpc } from "./glass-native.js";
 import {
   createDesktopUpdateService,
   DESKTOP_UPDATE_FEED_URL,
@@ -2004,7 +2003,6 @@ async function runDesktopApp(): Promise<void> {
     isPackaged: app.isPackaged,
     session: session.defaultSession,
   });
-  registerNativeGlassIpc();
 
   const paths = createDesktopPathContext();
   const iconPath = resolveDesktopIconPath({

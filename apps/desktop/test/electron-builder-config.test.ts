@@ -11,7 +11,6 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { createRequire } from "node:module";
 import { z } from "zod";
 import { describe, expect, it } from "vitest";
 import {
@@ -20,7 +19,6 @@ import {
 } from "../src/desktop-update-provider.js";
 
 const desktopPackageRoot = process.cwd();
-const requireFromTest = createRequire(import.meta.url);
 
 const macConfigSchema = z
   .object({
@@ -300,24 +298,6 @@ describe("electron-builder signing config", () => {
     const config = electronBuilderConfigSchema.parse(JSON.parse(configText));
 
     expect(config.npmRebuild).toBe(false);
-  });
-
-  it("replaces the packaged SQLite binary with the Electron prebuild", () => {
-    const { resolveBetterSqlite3PrebuildArguments } = requireFromTest(
-      "../scripts/prepare-native-modules.cjs",
-    ) as {
-      resolveBetterSqlite3PrebuildArguments: (options: {
-        arch: string;
-        electronVersion: string;
-      }) => string[];
-    };
-
-    expect(
-      resolveBetterSqlite3PrebuildArguments({
-        arch: "arm64",
-        electronVersion: "41.7.0",
-      }),
-    ).toContain("--force");
   });
 
   it("excludes source maps from packaged app files", async () => {

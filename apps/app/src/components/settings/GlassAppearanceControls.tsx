@@ -86,14 +86,14 @@ export function GlassAppearanceControls() {
               <Slider
                 aria-label={`${label} blur`}
                 min={0}
-                max={100}
+                max={30}
                 step={1}
                 value={[blur]}
                 onValueChange={([value = blur]) =>
                   updateValue(region, "Blur", value)
                 }
               />
-              <span className="text-right tabular-nums">{blur}%</span>
+              <span className="text-right tabular-nums">{blur}px</span>
             </label>
           </div>
         );

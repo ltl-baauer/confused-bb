@@ -4,7 +4,7 @@
   "artifactName": "${productName}-${version}-${arch}.${ext}",
   "afterPack": "scripts/prepare-native-modules.cjs",
   "asar": true,
-  "asarUnpack": ["dist/bb-app-bridge.mjs", "dist/native/**", "node_modules/**"],
+  "asarUnpack": ["dist/bb-app-bridge.mjs", "node_modules/**"],
   "directories": {
     "buildResources": "assets",
     "output": "release"
