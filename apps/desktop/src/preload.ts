@@ -31,6 +31,7 @@ import {
   BB_DESKTOP_INFO_CHANGED_CHANNEL,
   BB_DESKTOP_INSTALL_UPDATE_CHANNEL,
   BB_DESKTOP_OPEN_EXTERNAL_URL_CHANNEL,
+  BB_DESKTOP_SET_GLASS_BLUR_CHANNEL,
   BB_DESKTOP_SET_THEME_CHANNEL,
 } from "./desktop-update-ipc.js";
 import {
@@ -81,11 +82,11 @@ body.bb-app-shell::after {
 }
 
 body.bb-app-shell [data-sidebar="inset"] {
-  background-color: color-mix(in srgb, var(--background) var(--bb-glass-main-opacity, 2%), transparent) !important;
+  background-color: color-mix(in srgb, var(--background) var(--bb-glass-main-opacity, 0%), transparent) !important;
 }
 
 body.bb-app-shell [data-sidebar="panel"] {
-  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-sidebar-opacity, 4%), transparent) !important;
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-sidebar-opacity, 0%), transparent) !important;
 }
 
 body.bb-app-shell [data-sidebar="panel"] > [data-sidebar="sidebar"] {
@@ -93,13 +94,13 @@ body.bb-app-shell [data-sidebar="panel"] > [data-sidebar="sidebar"] {
 }
 
 body.bb-app-shell header.bg-surface-scrim {
-  background-color: color-mix(in srgb, var(--surface-scrim) 6%, transparent) !important;
+  background-color: color-mix(in srgb, var(--surface-scrim) var(--bb-glass-main-opacity, 0%), transparent) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
 body.bb-app-shell aside.bg-sidebar {
-  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-panel-opacity, 4%), transparent) !important;
+  background-color: color-mix(in srgb, var(--sidebar) var(--bb-glass-panel-opacity, 0%), transparent) !important;
 }
 
 body.bb-app-shell aside.bg-sidebar > .bg-sidebar,
@@ -389,6 +390,11 @@ const bbDesktopApi: BbDesktopApi = {
   },
   setTheme(theme: BbDesktopTheme): void {
     ipcRenderer.send(BB_DESKTOP_SET_THEME_CHANNEL, theme);
+  },
+  setGlassBlur(enabled: boolean): void {
+    if (process.env.BB_DESKTOP_RELEASE_CHANNEL === "glass") {
+      ipcRenderer.send(BB_DESKTOP_SET_GLASS_BLUR_CHANNEL, enabled);
+    }
   },
 };
 

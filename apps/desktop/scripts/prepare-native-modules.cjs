@@ -1,5 +1,5 @@
 const { spawn } = require("node:child_process");
-const { chmod, readFile, readdir, writeFile } = require("node:fs/promises");
+const { chmod, cp, readFile, readdir, writeFile } = require("node:fs/promises");
 const { createRequire } = require("node:module");
 const path = require("node:path");
 
@@ -8,9 +8,11 @@ const desktopPackageRoot = path.resolve(__dirname, "..");
 const NODE_MODULES_DIRECTORY = "node_modules";
 const NODE_PTY_PACKAGE_NAME = "node-pty";
 const BETTER_SQLITE3_PACKAGE_NAME = "better-sqlite3";
+const PARCEL_WATCHER_PACKAGE_NAME = "@parcel/watcher";
 const PACKAGED_NATIVE_PACKAGE_NAMES = [
   NODE_PTY_PACKAGE_NAME,
   BETTER_SQLITE3_PACKAGE_NAME,
+  PARCEL_WATCHER_PACKAGE_NAME,
 ];
 
 // better-sqlite3 must match the runtime that loads it. The packaged app runs
@@ -199,6 +201,35 @@ async function prepareBetterSqlite3PackageDirectory(packageDirectory, options) {
   );
 }
 
+async function installParcelWatcherBinary(packageDirectory, arch) {
+  const packageName = `@parcel/watcher-darwin-${arch}`;
+  const requireFromBbApp = createRequire(
+    path.resolve(
+      desktopPackageRoot,
+      "..",
+      "..",
+      "packages",
+      "bb-app",
+      "package.json",
+    ),
+  );
+  const watcherPackageJsonPath = requireFromBbApp.resolve(
+    `${PARCEL_WATCHER_PACKAGE_NAME}/package.json`,
+  );
+  const requireFromWatcher = createRequire(watcherPackageJsonPath);
+  const sourcePackageJsonPath = requireFromWatcher.resolve(
+    `${packageName}/package.json`,
+  );
+  const destination = path.join(
+    path.dirname(packageDirectory),
+    path.basename(packageName),
+  );
+  await cp(path.dirname(sourcePackageJsonPath), destination, {
+    force: true,
+    recursive: true,
+  });
+}
+
 async function preparePackagedNativeModules(appOutDir, options = {}) {
   if (!(await isDirectory(appOutDir))) {
     throw new Error(`Packaged app output does not exist: ${appOutDir}`);
@@ -221,6 +252,23 @@ async function preparePackagedNativeModules(appOutDir, options = {}) {
   if (options.electronVersion === undefined) {
     return { betterSqlite3Directories: [], nodePtyDirectories };
   }
+
+  const parcelWatcherDirectories = packageDirectories.get(
+    PARCEL_WATCHER_PACKAGE_NAME,
+  );
+  if (parcelWatcherDirectories.length === 0) {
+    throw new Error(
+      `Unable to find ${PARCEL_WATCHER_PACKAGE_NAME} under ${appOutDir}`,
+    );
+  }
+  await Promise.all(
+    parcelWatcherDirectories.map((packageDirectory) =>
+      installParcelWatcherBinary(
+        packageDirectory,
+        options.arch ?? process.arch,
+      ),
+    ),
+  );
 
   const betterSqlite3Directories = packageDirectories.get(
     BETTER_SQLITE3_PACKAGE_NAME,

@@ -127,6 +127,7 @@ import {
   BB_DESKTOP_INFO_CHANGED_CHANNEL,
   BB_DESKTOP_INSTALL_UPDATE_CHANNEL,
   BB_DESKTOP_OPEN_EXTERNAL_URL_CHANNEL,
+  BB_DESKTOP_SET_GLASS_BLUR_CHANNEL,
   BB_DESKTOP_SET_THEME_CHANNEL,
 } from "./desktop-update-ipc.js";
 import {
@@ -1559,6 +1560,18 @@ function registerDesktopUpdateIpc(): void {
       return;
     }
     nativeTheme.themeSource = parsed.data;
+  });
+
+  ipcMain.on(BB_DESKTOP_SET_GLASS_BLUR_CHANNEL, (event, payload: unknown) => {
+    if (
+      DESKTOP_RELEASE_INFO.channel !== "glass" ||
+      typeof payload !== "boolean"
+    ) {
+      return;
+    }
+    const browserWindow = BrowserWindow.fromWebContents(event.sender);
+    browserWindow?.setVibrancy(payload ? "under-window" : null);
+    browserWindow?.setBackgroundColor("#00000000");
   });
 
   ipcMain.on(BB_DESKTOP_CLOSE_WINDOW_RESPONSE_CHANNEL, (event, payload) => {

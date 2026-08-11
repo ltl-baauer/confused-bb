@@ -28,18 +28,34 @@ describe("glass appearance", () => {
         panelOpacity: 40,
       }),
     ).toEqual({
+      blurEnabled: true,
       mainOpacity: 100,
       sidebarOpacity: 0,
       panelOpacity: 40,
     });
   });
 
-  it("sets the almost-clear default tint", () => {
+  it("removes native blur from old fully transparent settings", () => {
+    expect(
+      parseGlassAppearanceSettings({
+        mainOpacity: 0,
+        sidebarOpacity: 0,
+        panelOpacity: 0,
+      }),
+    ).toEqual({
+      blurEnabled: false,
+      mainOpacity: 0,
+      sidebarOpacity: 0,
+      panelOpacity: 0,
+    });
+  });
+
+  it("sets the fully clear default tint", () => {
     applyGlassAppearanceSettings(DEFAULT_GLASS_APPEARANCE);
     expect(
       document.documentElement.style.getPropertyValue(
         "--bb-glass-main-opacity",
       ),
-    ).toBe("2%");
+    ).toBe("0%");
   });
 });

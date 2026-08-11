@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Button } from "@bb/shared-ui/button";
 import { Slider } from "@bb/shared-ui/slider";
+import { Switch } from "@bb/shared-ui/switch";
 import { isGlassAppearanceAvailable } from "@/lib/bb-desktop";
 import {
   DEFAULT_GLASS_APPEARANCE,
   useGlassAppearanceSettings,
-  type GlassAppearanceSettings,
 } from "@/lib/glass-appearance";
 
 type GlassRegion = "main" | "sidebar" | "panel";
+type GlassOpacityKey = `${GlassRegion}Opacity`;
 
 const GLASS_REGIONS: ReadonlyArray<{
   label: string;
@@ -27,11 +28,8 @@ export function GlassAppearanceControls() {
     return null;
   }
 
-  const updateValue = (
-    region: GlassRegion,
-    value: number,
-  ): void => {
-    const key = `${region}Opacity` as keyof GlassAppearanceSettings;
+  const updateValue = (region: GlassRegion, value: number): void => {
+    const key = `${region}Opacity` as GlassOpacityKey;
     setSettings({ ...settings, [key]: value });
   };
 
@@ -41,7 +39,8 @@ export function GlassAppearanceControls() {
         <div>
           <p className="text-sm text-foreground">Glass</p>
           <p className="mt-0.5 text-xs text-subtle-foreground/75">
-            Set each region&apos;s transparency. macOS supplies the native blur.
+            Native blur affects the full window. Region controls set only the
+            color tint.
           </p>
         </div>
         <Button
@@ -53,10 +52,25 @@ export function GlassAppearanceControls() {
           Reset
         </Button>
       </div>
+      <div className="flex items-center justify-between rounded-md border border-border/70 bg-muted/20 p-3">
+        <div>
+          <p className="text-xs font-medium text-foreground">Native blur</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Blur adds a macOS material tint. Turn it off for a fully clear
+            window.
+          </p>
+        </div>
+        <Switch
+          aria-label="Native blur"
+          checked={settings.blurEnabled}
+          onCheckedChange={(blurEnabled) =>
+            setSettings({ ...settings, blurEnabled })
+          }
+        />
+      </div>
       {GLASS_REGIONS.map(({ label, region }) => {
-        const opacityKey = `${region}Opacity` as keyof GlassAppearanceSettings;
+        const opacityKey = `${region}Opacity` as GlassOpacityKey;
         const opacity = settings[opacityKey];
-        const transparency = 100 - opacity;
 
         return (
           <div
@@ -65,18 +79,18 @@ export function GlassAppearanceControls() {
           >
             <p className="text-xs font-medium text-foreground">{label}</p>
             <label className="grid grid-cols-[92px_1fr_44px] items-center gap-3 text-xs text-muted-foreground">
-              <span>Transparency</span>
+              <span>Tint opacity</span>
               <Slider
-                aria-label={`${label} transparency`}
+                aria-label={`${label} tint opacity`}
                 min={0}
                 max={100}
                 step={1}
-                value={[transparency]}
-                onValueChange={([value = transparency]) =>
-                  updateValue(region, 100 - value)
+                value={[opacity]}
+                onValueChange={([value = opacity]) =>
+                  updateValue(region, value)
                 }
               />
-              <span className="text-right tabular-nums">{transparency}%</span>
+              <span className="text-right tabular-nums">{opacity}%</span>
             </label>
           </div>
         );

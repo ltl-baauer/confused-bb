@@ -107,4 +107,9 @@ export interface BbDesktopApi extends BbDesktopInfo {
    * build where `window.bbDesktop` is undefined.
    */
   setTheme(theme: BbDesktopTheme): void;
+  /**
+   * Enable or remove the native macOS window blur in the Glass release.
+   * The method is optional for desktop shells that predate Glass controls.
+   */
+  setGlassBlur?(enabled: boolean): void;
 }

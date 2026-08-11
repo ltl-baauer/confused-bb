@@ -13,6 +13,7 @@ import {
   BB_DESKTOP_CHECK_FOR_UPDATES_CHANNEL,
   BB_DESKTOP_GET_INFO_CHANNEL,
   BB_DESKTOP_INSTALL_UPDATE_CHANNEL,
+  BB_DESKTOP_SET_GLASS_BLUR_CHANNEL,
   BB_DESKTOP_SET_THEME_CHANNEL,
 } from "../src/desktop-update-ipc.js";
 import {
@@ -193,23 +194,26 @@ function emitIpcPayload(args: EmitIpcPayloadArgs): void {
 
 describe("desktop preload browser API", () => {
   it("removes stacked renderer backgrounds from glass builds", async () => {
-    await loadPreload("glass");
+    const api = await loadPreload("glass");
 
     expect(electronMock.insertedCss).toHaveLength(1);
     expect(electronMock.insertedCss[0]).toContain(
-      "body.bb-app-shell [data-sidebar=\"inset\"]",
+      'body.bb-app-shell [data-sidebar="inset"]',
     );
     expect(electronMock.insertedCss[0]).toContain(
-      "[data-sidebar=\"panel\"] > [data-sidebar=\"sidebar\"]",
+      '[data-sidebar="panel"] > [data-sidebar="sidebar"]',
     );
     expect(electronMock.insertedCss[0]).toContain(
       "background-color: transparent !important",
     );
     expect(electronMock.insertedCss[0]).not.toContain("blur(");
-    expect(electronMock.insertedCss[0]).not.toContain(
-      "--bb-glass-main-filter",
-    );
+    expect(electronMock.insertedCss[0]).not.toContain("--bb-glass-main-filter");
     expect(electronMock.exposedApi?.glassAppearance).toBe(true);
+    api.setGlassBlur?.(false);
+    expect(electronMock.sendCalls).toContainEqual({
+      channel: BB_DESKTOP_SET_GLASS_BLUR_CHANNEL,
+      payload: false,
+    });
   });
 
   it("exposes a narrow spellcheck helper for desktop context menus", async () => {
